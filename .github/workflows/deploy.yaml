@@ -97,11 +97,8 @@ jobs:
           
       - name: Configure kubectl context
         run: |
-            kubectl config use-context arn:aws:eks:${{ env.AWS_REGION }}:${{ github.actor }}:cluster/${{ env.CLUSTER_NAME }}
-            kubectl config set-context --current --namespace=jenkins
-            
-            # Verify the configuration
-            kubectl config view --minify
+             kubectl config set-context ${{ env.CLUSTER_NAME }} --namespace=${{ env.K8S_NAMESPACE }}
+             kubectl config view --minify
 
       - name: Update Kubernetes manifests with image
         run: |
