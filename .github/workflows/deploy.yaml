@@ -75,27 +75,32 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and push Docker image
+        id: build-image
         run: |
           IMAGE_TAG=${{ github.sha }}
           cd app
           docker build -t $ECR_REPO:$IMAGE_TAG .
           docker tag $ECR_REPO:$IMAGE_TAG ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
           docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+          echo "image=${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Configure kubectl
-        uses: aws-actions/amazon-eks-setup-cluster@v1
-        with:
-          cluster-name: ${{ env.CLUSTER_NAME }}
-          aws-region: ${{ env.AWS_REGION }}
-   
-      - name: Update image in manifests
-        run: |
-           find $K8S_MANIFEST_DIR -name '*.yaml' -exec sed -i "s|image:.*$ECR_REPOSITORY.*|image: ${{ steps.build-image.outputs.image }}|g" {} \;
+        uses: azure/setup-kubectl@v3
 
+        
+      - name: Configure EKS access
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ env.AWS_REGION }} \
+            --name ${{ env.CLUSTER_NAME }}
+          kubectl config set-context --current --namespace=${{ env.K8S_NAMESPACE }} 
+
+      - name: Update Kubernetes manifests with image
+        run: |
+          find ${{ env.K8S_MANIFEST_DIR }} -name '*.yaml' -exec sed -i "s|image:.*${{ env.ECR_REPO }}.*|image: ${{ steps.build-image.outputs.image }}|g" {} \;
       
       - name: Deploy to EKS cluster
         run: |
-             kubectl config set-context --current --namespace=$K8S_NAMESPACE
-             kubectl apply -f $K8S_MANIFEST_DIR
-             kubectl get pods -n $K8S_NAMESPACE
+             kubectl apply -f ${{ env.K8S_MANIFEST_DIR }}
+             kubectl get pods -n ${{ env.K8S_NAMESPACE }}
      
