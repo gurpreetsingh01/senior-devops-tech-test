@@ -92,7 +92,8 @@ jobs:
         run: |
           aws eks update-kubeconfig \
             --region ${{ env.AWS_REGION }} \
-            --name ${{ env.CLUSTER_NAME }}
+            --name ${{ env.CLUSTER_NAME }} \
+            --role-arn arn:aws:iam::396608773722:role/GitHubActionsECREKSRole \
           kubectl config set-context --current --namespace=${{ env.K8S_NAMESPACE }} 
 
       - name: Update Kubernetes manifests with image
