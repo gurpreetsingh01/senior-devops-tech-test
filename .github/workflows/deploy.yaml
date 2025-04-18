@@ -49,7 +49,6 @@ jobs:
       - name: Run Mocked Unit Tests
         run: |
           echo "Mocking unit tests..."
-          # replace this with actual test command
           exit 0
 
   build_and_push:
@@ -93,7 +92,7 @@ jobs:
           aws eks update-kubeconfig \
             --region ${{ env.AWS_REGION }} \
             --name ${{ env.CLUSTER_NAME }} \
-            --role-arn arn:aws:iam::396608773722:role/GitHubActionsECREKSRole
+       
           
       - name: Configure kubectl context
         run: |
@@ -104,13 +103,7 @@ jobs:
         run: |
           find ${{ env.K8S_MANIFEST_DIR }} -name '*.yaml' -exec sed -i "s|image:.*${{ env.ECR_REPO }}.*|image: ${{ steps.build-image.outputs.image }}|g" {} \;
       
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-            role-to-assume: arn:aws:iam::396608773722:role/GitHubActionsECREKSRole
-            role-session-name: GitHubActions-${{ github.run_id }}
-            aws-region: ${{ env.AWS_REGION }}
-      
+            
       - name: Deploy to EKS cluster
         run: |
              kubectl apply -f ${{ env.K8S_MANIFEST_DIR }}
