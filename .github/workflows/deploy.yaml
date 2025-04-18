@@ -104,6 +104,13 @@ jobs:
         run: |
           find ${{ env.K8S_MANIFEST_DIR }} -name '*.yaml' -exec sed -i "s|image:.*${{ env.ECR_REPO }}.*|image: ${{ steps.build-image.outputs.image }}|g" {} \;
       
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: arn:aws:iam::396608773722:role/GitHubActionsECREKSRole
+            role-session-name: GitHubActions-${{ github.run_id }}
+            aws-region: ${{ env.AWS_REGION }}
+      
       - name: Deploy to EKS cluster
         run: |
              kubectl apply -f ${{ env.K8S_MANIFEST_DIR }}
