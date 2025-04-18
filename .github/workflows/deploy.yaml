@@ -60,7 +60,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::396608773722:role/GitHubActionsECREKSRole
+          role-to-assume: arn:aws:iam::396608773722:role/GitHubActionsEKSDeploy
           role-session-name: GitHubActions-${{ github.run_id }}
           aws-region: ${{ env.AWS_REGION }}
 
@@ -92,8 +92,8 @@ jobs:
         run: |
           aws eks update-kubeconfig \
             --region ${{ env.AWS_REGION }} \
-            --name ${{ env.CLUSTER_NAME }} \
-            --role-arn arn:aws:iam::396608773722:role/GitHubActionsEKSDeploy
+            --name ${{ env.CLUSTER_NAME }}
+
        
           
       - name: Configure kubectl context
