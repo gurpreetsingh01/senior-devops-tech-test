@@ -86,3 +86,45 @@ terraform plan
 terraform apply
 
 
+### CI/CD Pipeline: Deploy to Amazon EKS using GitHub Actions
+
+This project uses GitHub Actions to automatically build, test, and deploy a Node.js application to an **Amazon EKS cluster** when code is pushed to the `main` or `staging` branches.
+
+
+ ### Workflow Overview
+
+A[Push to main/staging] --> B[Checkout Code]
+  B --> C[Lint YAML Files]
+  C --> D[Validate K8s Manifests]
+  D --> E[Run Unit Tests]
+  E --> F[Configure AWS Credentials]
+  F --> G[Login to Amazon ECR]
+  G --> H[Build Docker Image]
+  H --> I[Tag with SHA & latest]
+  I --> J[Push to ECR]
+  J --> K[Configure kubectl]
+  K --> L[Setup EKS Access]
+  L --> M[Update K8s Manifests]
+  M --> N[Deploy to EKS Cluster]
+
+
+### Project Structure
+
+├── .github/
+│   └── workflows/
+│       └── deploy.yml         # GitHub Actions pipeline
+├── k8s/                       # Kubernetes manifests
+│   ├── deployment.yaml        # Kubernetes Deployment
+│   ├── service.yaml           # Kubernetes Service
+│   ├── ingress.yaml           # Ingress Resource
+│   ├── secret.yaml            # Kubernetes Secret
+│   └── configmap.yaml         # Kubernetes ConfigMap
+├── app/
+│   ├── Dockerfile             # Docker build instructions
+│   ├── package.json           # Node.js dependencies and scripts
+│   └── server.js              # Entry point for Node.js app
+└── README.md
+
+
+
+
