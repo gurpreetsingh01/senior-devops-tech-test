@@ -113,10 +113,11 @@ jobs:
              kubectl config set-context ${{ env.CLUSTER_NAME }} --namespace=${{ env.K8S_NAMESPACE }}
              kubectl config view --minify
 
-      - name: Update Kubernetes manifests with image
+      - name: Inject built image into deployment manifest
         run: |
-          find ${{ env.K8S_MANIFEST_DIR }} -name '*.yaml' -exec sed -i "s|image:.*${{ env.ECR_REPO }}.*|image: ${{ steps.build-image.outputs.image }}|g" {} \;
-      
+               echo "Injecting built image: ${{ env.image }}"
+               find ${{ env.K8S_MANIFEST_DIR }} -type f -name '*.yaml' -exec sed -i "s|PLACEHOLDER_IMAGE_URI|${{ env.image }}|g" {} \;
+           
             
       - name: Deploy to EKS cluster
         run: |
