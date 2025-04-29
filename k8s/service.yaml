@@ -4,6 +4,7 @@ metadata:
   name: nodejs-service
   namespace: jenkins
 spec:
+  type: LoadBalancer
   selector:
     app: nodejs-app
   ports:
